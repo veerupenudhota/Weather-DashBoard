@@ -1,24 +1,23 @@
-# Use official Maven image to build the project
-FROM maven:3.8.5-openjdk-17 AS build
-
-# Set working directory inside the container
+# Use a JDK 21 image to build
+FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
 
-# Copy all project files into the container
+# Copy everything and give permission
 COPY . .
+RUN chmod +x mvnw
 
-# Build the project and skip tests if needed
-RUN mvn clean package -DskipTests
+# Build the Spring Boot application
+RUN ./mvnw clean package -DskipTests
 
-# ------------------------------
-# Use a smaller runtime image
-FROM openjdk:17-jdk-slim
-
-# Set working directory in the runtime container
+# Use a slim runtime image
+FROM eclipse-temurin:21-jre
 WORKDIR /app
 
-# Copy the built JAR from the builder image
-COPY --from=build /app/target/Weather-DashBoard-0.0.1-SNAPSHOT.jar app.jar
+# Copy the built jar file from the build stage
+COPY --from=build /app/target/*.jar app.jar
 
-# Run the JAR file
-CMD ["java", "-jar", "app.jar"]
+# Expose the application port
+EXPOSE 8080
+
+# Run the jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
