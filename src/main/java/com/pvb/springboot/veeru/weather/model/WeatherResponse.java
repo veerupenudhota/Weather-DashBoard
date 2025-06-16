@@ -30,6 +30,6 @@ public class WeatherResponse {
 		this.humidity = humidity;
 	}
 
-    // Getters and Setters
+    
     
 }
